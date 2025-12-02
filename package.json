@@ -1,6 +1,11 @@
 {
-  "name": "base",
+  "name": "nextjs-with-payload",
   "version": "0.1.0",
+  "description": "Next.js project with Payload CMS integration",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GuilhermeFT/nextjs-with-payload.git"
+  },
   "type": "module",
   "private": true,
   "scripts": {
