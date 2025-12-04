@@ -5,6 +5,7 @@ import { buildConfig } from 'payload'
 import { en } from '@payloadcms/translations/languages/en'
 import { pt } from '@payloadcms/translations/languages/pt'
 import { seoPlugin } from '@payloadcms/plugin-seo'
+import { nestedDocsPlugin } from '@payloadcms/plugin-nested-docs'
 
 import {
   GenerateTitle,
@@ -97,6 +98,12 @@ export default buildConfig({
       generateTitle,
       generateDescription,
       generateURL,
+    }),
+    nestedDocsPlugin({
+      collections: ['pages'],
+      generateLabel: (_, doc) => doc.title as string,
+      generateURL: (docs) =>
+        docs.reduce((url, doc) => `${url}/${doc.slug}`, ''),
     }),
   ],
 

@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { RichTextBlock } from '../blocks/rich-text-block'
+import { slugField } from 'payload'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
@@ -15,7 +16,7 @@ export const Pages: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'slug', 'isHomepage', 'updatedAt'],
+    defaultColumns: ['title', 'slug', 'parent', 'isHomepage', 'updatedAt'],
     group: {
       en: 'Content',
       pt: 'Conteúdo',
@@ -35,22 +36,13 @@ export const Pages: CollectionConfig = {
         pt: 'Título',
       },
     },
-    {
+    slugField({
+      useAsSlug: 'title',
       name: 'slug',
-      type: 'text',
+      checkboxName: 'generateSlug',
       required: true,
-      unique: true,
-      label: {
-        en: 'Slug',
-        pt: 'Slug',
-      },
-      admin: {
-        description: {
-          en: 'URL-friendly identifier for the page',
-          pt: 'Identificador amigável para URL da página',
-        },
-      },
-    },
+      position: 'sidebar',
+    }),
     {
       name: 'isHomepage',
       type: 'checkbox',
