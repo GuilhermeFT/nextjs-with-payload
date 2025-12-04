@@ -2,27 +2,105 @@ import sharp from 'sharp'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { sqliteAdapter } from '@payloadcms/db-sqlite'
 import { buildConfig } from 'payload'
+import { en } from '@payloadcms/translations/languages/en'
+import { pt } from '@payloadcms/translations/languages/pt'
+import { seoPlugin } from '@payloadcms/plugin-seo'
+
+import {
+  GenerateTitle,
+  GenerateDescription,
+  GenerateURL,
+} from '@payloadcms/plugin-seo/types'
+import { Media, Pages } from './payload/collections'
+import { Footer, Header, SEO } from './payload/globals'
+
+const generateTitle: GenerateTitle = async ({ doc, locale }) => {
+  if (doc?.meta?.title) {
+    if (typeof doc.meta.title === 'string') {
+      return doc.meta.title
+    }
+
+    return doc.meta.title[locale || 'pt'] || ''
+  }
+
+  return doc?.meta?.title || doc?.title || ''
+}
+
+const generateDescription: GenerateDescription = async ({ doc, locale }) => {
+  if (doc?.meta?.description) {
+    if (typeof doc.meta.description === 'string') {
+      return doc.meta.description
+    }
+
+    return doc.meta.description[locale || 'pt'] || ''
+  }
+
+  return doc?.meta?.description || ''
+}
+
+const generateURL: GenerateURL = async ({ doc, locale }) => {
+  const slug = doc?.slug
+  if (!slug) return ''
+
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://guilhermeft.dev'
+  const localePrefix = locale && locale !== 'pt' ? `/${locale}` : ''
+
+  return `${baseUrl}${localePrefix}/${slug}`
+}
 
 export default buildConfig({
-  // If you'd like to use Rich Text, pass your editor here
   editor: lexicalEditor(),
 
-  // Define and configure your collections in this array
-  collections: [],
+  collections: [Pages, Media],
 
-  // Your Payload secret - should be a complex and secure string, unguessable
+  globals: [Header, Footer, SEO],
+
+  i18n: {
+    supportedLanguages: {
+      en,
+      pt,
+    },
+    fallbackLanguage: 'pt',
+  },
+
+  localization: {
+    locales: [
+      {
+        code: 'en',
+        label: 'English',
+      },
+      {
+        code: 'pt',
+        label: 'Português (Brasil)',
+      },
+    ],
+    defaultLocale: 'pt',
+    fallback: true,
+  },
+
   secret: process.env.PAYLOAD_SECRET || '',
-  // Whichever Database Adapter you're using should go here
-  // Mongoose is shown as an example, but you can also use Postgres
+
   db: sqliteAdapter({
     client: {
       url: process.env.DATABASE_URL!,
       authToken: process.env.DATABASE_AUTH_TOKEN,
     },
   }),
-  // If you want to resize images, crop, set focal point, etc.
-  // make sure to install it and pass it to the config.
-  // This is optional - if you don't need to do these things,
-  // you don't need it!
+
   sharp,
+
+  plugins: [
+    seoPlugin({
+      collections: ['pages', 'projects'],
+      uploadsCollection: 'media',
+      tabbedUI: true,
+      generateTitle,
+      generateDescription,
+      generateURL,
+    }),
+  ],
+
+  typescript: {
+    outputFile: './src/payload-types.ts',
+  },
 })
